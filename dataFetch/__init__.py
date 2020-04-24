@@ -69,10 +69,10 @@ class StockData(object):
 
 
 
-#%%
-data = StockData(
-    symbol = 'IVV'
-).getData()
+# #%%
+# data = StockData(
+#     symbol = 'IVV'
+# ).getData()
 
 # # %%
 # # Plot the close prices

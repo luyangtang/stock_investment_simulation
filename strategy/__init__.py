@@ -32,9 +32,7 @@ class AIPStrategy(Strategy):
     '''
     Automatic Investment Plan Strategy
 
-    timetable: list of date as str '%Y-%m-%d' or datetime obj
-        if there's no quote on one of the quote, it will be ignored with a warning
-        cannot be repeated
+    timetable: instance of Timetable
     
     investAmountType: callable taking date as an object with a numeric output
         this amount will be invested (allowing fraction of share invested) on the given date
@@ -42,6 +40,9 @@ class AIPStrategy(Strategy):
     **kwargs:
         parameters to be consumed by investAmountType
     '''
+
+    # static variables
+    defaultAmount = 100
 
     def __init__(self, timetable, investAmountType, **kwargs):
         
@@ -51,24 +52,76 @@ class AIPStrategy(Strategy):
 
         super().__init__()
 
-        # take unique values only
-        timetable = list(set(timetable)) if (isinstance(timetable, Iterable) and not isinstance(timetable, str)) else [timetable]
+        # convert timetable to a timetable
+        timetable = Timetable(timetable)
+
+        # get amount from kwargs if any other default to 100
+        amount = kwargs['amount'] if 'amount' in kwargs.keys() else self.defaultAmount
+
         
         # convert the timetable elements to datetime
-        for date in timetable:
+        for date in timetable.timetable:
 
             try:
 
                 # add the date - amount to self.plan
-                self.plan.update(InvestAmount().FixedAmount(date = date, amount = 1))
+                self.plan.update(InvestAmount().FixedAmount(date = date, amount = amount))
 
             except Exception as err:
                 print(err)
-                warnings('%s is removed from the timetable due to %s' % (date, err))
+                warnings('Warning: %s is removed from the timetable due to %s' % (date, err))
 
         
 
+class Timetable(object):
 
+    def __init__(self, timetable):
+
+        '''
+        timetable: list of date as str '%Y-%m-%d' or datetime obj
+        if there's no quote on one of the quote, it will be ignored with a warning
+        cannot be repeated
+        '''
+        self.constructorType = 0
+
+        # copy constructor
+        if isinstance(timetable, Timetable):
+
+            self.constructorType = 'copyConstructor'
+            self.timetable = timetable.timetable
+
+        
+        # if timetable is given as a list
+        else:
+            self.constructorType = 'constructFromList'
+
+            # take unique values only
+            timetable = list(set(timetable)) if (isinstance(timetable, Iterable) and not isinstance(timetable, str)) else [timetable]
+            
+            self.timetable = []
+
+            # convert the timetable elements to datetime
+            for date in timetable:
+
+                if isinstance(date, dt):
+                    self.timetable += [date]
+
+                else: 
+                    try:
+
+                        # add the date - amount to self.plan
+                        self.timetable += [dt.strptime(date, '%Y-%m-%d')]
+
+                    except Exception as err:
+                        print(err)
+                        warnings('Warning: %s cannot be converted due to %s' % (date, err))
+                
+            
+
+
+    def get(self):
+
+        return self.timetable
 
 
 
