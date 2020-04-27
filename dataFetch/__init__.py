@@ -7,7 +7,16 @@ import warnings
 
 class StockData(object):
 
-    def __init__(self, symbol, start = '2000-01-01', end = '2020-04-20', loadFromApi = True, exportDataTo = None, dataPath = None):
+    def __init__(
+        self, 
+        symbol, 
+        start = '2000-01-01', 
+        end = '2020-04-20', 
+        loadFromApi = True, 
+        exportDataTo = None, 
+        dataPath = None
+    ):
+
 
         self.symbol = symbol
         self.start = start
@@ -29,7 +38,7 @@ class StockData(object):
                 
                 # export the data if exportData = True
                 if exportDataTo:
-                    self.data.to_csv(exportDataTo)
+                    self.data.to_csv(exportDataTo, index = 'Date')
 
                     self.flag = 2
 
@@ -44,8 +53,13 @@ class StockData(object):
             try:
 
                 # read data into df from the specified path
-                self.data = pd.read_csv(dataPath)
+                self.data = pd.read_csv(dataPath, index_col = ['Date'])
+
+                # convert the type of date
+                self.data.index = pd.to_datetime(self.data.index)
+
                 self.flag = 3
+
 
             
             except Exception as err:
