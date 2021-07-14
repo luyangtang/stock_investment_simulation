@@ -34,5 +34,41 @@ strategy = \
     Strategy().fixed_amount_per_period(start_date_df = start_date, end_date_df = end_date)
 cleaned_strategy = Strategy.clean(strategy, market_dates)
 
-fixex_amount_portfolio = Portfolio(index_data, cleaned_strategy, portfolio_name = 'fixed_amount').plot()
+fixed_amount_portfolio = Portfolio(index_data, cleaned_strategy, portfolio_name = 'fixed_amount')
+
+tmp = fixed_amount_portfolio.portfolio_data
+
+
+
+
+# %%
+
+# tmp['portfolio_position'] - tmp['acc_value']
+
+# %%
+import math
+
+def ann_return(opening, closing, years):
+
+    try:
+        return math.exp(
+            (math.log(closing - opening)) / years
+        ) - 1
+
+    except:
+        return None
+
+
+# print(ann_return(100,200,1))
+# print(ann_return(100,300,1))
+# print(ann_return(100,200,0))
+
+
+tmp['Date_dt'] - start_date
+#%%
+tmp.apply(lambda x: ann_return(
+    x['acc_value'], 
+    x['portfolio_position'], 
+    (x['Date_dt'] - start_date).days /365
+    ), axis = 1)
 # %%
