@@ -21,11 +21,15 @@ def roll_date(date, market_dates):
     date format allowed: '%Y-%m-%d'
     '''
 
-    try:
-        date = dt.strptime(date, date_format)
+    if isinstance(date, dt):
+        pass
     
-    except Exception as e:
-        raise Exception('Incorrect date format')
+    else:
+        try:
+            date = dt.strptime(date, date_format)
+        
+        except Exception as e:
+            raise Exception('Incorrect date format')
 
     # see if the entry date is in the index_data
      # all dates present in stock data
@@ -44,9 +48,9 @@ def roll_date(date, market_dates):
         raise Exception('invalid entry date. No further dates present in market data')
 
 
-print(roll_date('2019-01-01', market_dates))
-print(roll_date('2019-01-03', market_dates))
-print(roll_date('2021-01-01', market_dates))
+# print(roll_date('2019-01-01', market_dates))
+# print(roll_date('2019-01-03', market_dates))
+# print(roll_date('2021-01-01', market_dates))
 
 # %%
 def roll_date_array(dates, market_dates):
@@ -75,18 +79,32 @@ print(rolled_dates)
 print([i in list(market_dates) for i in rolled_dates])
 
 
+#%%
+from strategy import Strategy
+
+start_date = dt(2001,1,1)
+end_date = dt(2020,1,1)
+
+strategy = \
+    Strategy().fixed_amount_per_period(start_date_df = start_date, end_date_df = end_date)
+
+
+
+
+
+
 # %%
 # clean the strategy dates
 # value based strategy
 
-strategy = {
-    '2000-01-03': {"value": 100},
-    '2002-01-03': {"value": 200},
-    '2004-01-03': {"value": 100},
-    '2006-01-03': {"value": 300},
-    '2008-01-03': {"value": -100},
-    '2022-01-03': {"value": 100},
-}
+# strategy = {
+#     '2000-01-03': {"value": 100},
+#     '2002-01-03': {"value": 200},
+#     '2004-01-03': {"value": 100},
+#     '2006-01-03': {"value": 300},
+#     '2008-01-03': {"value": -100},
+#     '2022-01-03': {"value": 100},
+# }
 
 
 
@@ -129,6 +147,7 @@ cleaned_strategy = clean_strategy(strategy)
 # assign the value to the investment dates
 def map_investment_value(date, strategy):
     try:
+        print(strategy[date])
         return strategy[date]['value']
     
     except:
@@ -169,4 +188,7 @@ portfolio_data.plot(
         'inc_value',
     ]
 )
+# %%
+
+map_investment_value(portfolio_data[portfolio_data['Date_dt'] == dt(2019,4,29)], clean_strategy)
 # %%
