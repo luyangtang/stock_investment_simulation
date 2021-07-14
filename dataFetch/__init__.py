@@ -3,11 +3,12 @@
 import yfinance as yf  
 import pandas as pd
 import warnings
-
+from datetime import datetime as dt
+date_format = '%Y-%m-%d'
 
 class StockData(object):
 
-    def __init__(self, symbol, start = '2000-01-01', end = '2020-04-20', loadFromApi = True, exportDataTo = None, dataPath = None):
+    def __init__(self, symbol, start = '2000-01-01', end = '2020-04-20', loadFromApi = True, exportDataTo = None, dataPath = None, date_format = date_format):
 
         self.symbol = symbol
         self.start = start
@@ -57,6 +58,19 @@ class StockData(object):
             
             raise(Exception('dataPath must be provided if not loading from api'))
 
+        
+        index_data = pd.DataFrame(self.data.to_records())
+        
+        try:
+            index_data['Date_dt'] = index_data['Date'].apply(lambda x: dt.strptime(x, date_format))
+        except:
+            index_data['Date_dt'] = index_data['Date']
+        market_dates = index_data['Date_dt']
+
+        self.index_data = index_data
+        self.market_dates = market_dates
+
+
 
         # show warning if no data created
         if self.data.empty:
@@ -65,24 +79,14 @@ class StockData(object):
     
     def getData(self):
 
-        return self.data
+        return {
+            "index_data": self.index_data,
+            "market_dates": self.market_dates
+        }
 
 
 
 #%%
-data = StockData(
-    symbol = 'IVV'
-).getData()
-
-# # %%
-# # Plot the close prices
-# import matplotlib.pyplot as plt
-# data.Close.plot()
-# plt.show()
-# # %%
-
-
-# data
-
-# # %%
-
+# data = StockData(
+#     symbol = 'IVV'
+# ).getData()
